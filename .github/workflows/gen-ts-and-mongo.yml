@@ -14,7 +14,8 @@ env:
   REGISTRY: ghcr.io
   PACKAGE_DIR: ts-and-mongo
   # github.repository as <account>/<repo>
-  IMAGE_NAME: ${{ github.repository }}/${{ env.PACKAGE_DIR }}
+  IMAGE_NAME: ${{ github.repository }}
+  
 
 jobs:
   devcontainer:
@@ -38,8 +39,8 @@ jobs:
         run: npm install -g "@vscode/dev-container-cli"
       - name: Build devcontainer
         run: devcontainer build --no-cache --image-name ${{ env.IMAGE_NAME }} ${{ env.PACKAGE_DIR }}
-        with:
-          docker_buildkit: 1
-          buildkit_progress: plain
+        env:
+          DOCKER_BUILDKIT: 1
+          BUILDKIT_PROGRESS: plain
       - name: Publish
-        run: docker push "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
+        run: docker push "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ env.PACKAGE_DIR }}:latest"
