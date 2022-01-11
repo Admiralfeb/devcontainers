@@ -27,6 +27,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+      - name: Set Image name lowercase
+        id: image_lc
+        run: echo "IMAGE_LC=${IMAGE_NAME,,}" >> $GITHUB_ENV
+        env:
+          IMAGE_NAME: '${{ env.IMAGE_NAME }}'
       - name: Log into registry ${{ env.REGISTRY }}
         if: github.event_name != 'pull_request'
         uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
@@ -37,14 +42,9 @@ jobs:
       - name: Install devcontainer cli
         run: npm install -g "@vscode/dev-container-cli"
       - name: Build devcontainer
-        run: devcontainer build --no-cache --image-name ${{ env.IMAGE_NAME }} ${{ env.PACKAGE_DIR }}
+        run: devcontainer build --no-cache --image-name ${{ env.IMAGE_LC }} ${{ env.PACKAGE_DIR }}
         env:
           DOCKER_BUILDKIT: 1
           BUILDKIT_PROGRESS: plain
-      - name: Set Image name lowercase
-        id: image_lc
-        run: echo "IMAGE_LC=${IMAGE_NAME,,}" >> $GITHUB_ENV
-        env:
-          IMAGE_NAME: '${{ env.IMAGE_NAME }}'
       - name: Publish
         run: docker push "${{ env.REGISTRY }}/${{ env.IMAGE_LC }}/${{ env.PACKAGE_DIR }}:latest"
