@@ -42,7 +42,5 @@ jobs:
         env:
           DOCKER_BUILDKIT: 1
           BUILDKIT_PROGRESS: plain
-      - name: Lowercase image name
-        run: echo 
       - name: Publish
         run: docker push "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ env.PACKAGE_DIR }}:latest"
