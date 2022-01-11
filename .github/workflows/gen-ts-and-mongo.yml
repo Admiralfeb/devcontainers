@@ -43,6 +43,8 @@ jobs:
           BUILDKIT_PROGRESS: plain
       - name: Set Image name lowercase
         id: image_lc
-        run: echo "IMAGE_LC=${{ env.IMAGE_NAME,, }}" >> $GITHUB_ENV
+        run: echo "IMAGE_LC=${IMAGE_NAME,,}" >> $GITHUB_ENV
+        env:
+          IMAGE_NAME: '${{ env.IMAGE_NAME }}'
       - name: Publish
         run: docker push "${{ env.REGISTRY }}/${{ env.IMAGE_LC }}/${{ env.PACKAGE_DIR }}:latest"
