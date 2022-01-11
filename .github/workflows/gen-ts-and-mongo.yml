@@ -8,30 +8,38 @@ on:
     paths:
       - 'ts-and-mongo/**/*'
   workflow_dispatch:
-permissions:
-  contents: read
-  packages: write
+
+env:
+  # Use docker.io for Docker Hub if empty
+  REGISTRY: ghcr.io
+  PACKAGE_DIR: ts-and-mongo
+  # github.repository as <account>/<repo>
+  IMAGE_NAME: ${{ github.repository }}/${{ env.PACKAGE_DIR }}
+
 jobs:
   devcontainer:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+
     steps:
-      - uses: actions/checkout@v2
-      - run: |
-          set -e
-
-          # Update this based on your image name and the path of the .devcontainer folder in your repository
-          FOLDER_WITH_DOT_DEVCONTAINER="ts-and-mongo"
-          IMAGE_NAME="devcontainers/${FOLDER_WITH_DOT_DEVCONTAINER}"
-          IMAGE_REPOSITORY="$(echo "ghcr.io/${{ github.repository_owner }}/${IMAGE_NAME}" | tr '[:upper:]' '[:lower:]')"
-
-          # [Optional] Enable buildkit, set output to plain text for logging
-          export DOCKER_BUILDKIT=1
-          export BUILDKIT_PROGRESS=plain
-
-          # Do the build - update
-          npm install -g "@vscode/dev-container-cli"
-          devcontainer build --no-cache --image-name "${IMAGE_REPOSITORY}" "${FOLDER_WITH_DOT_DEVCONTAINER}"
-
-          # Push image to GitHub Container Registry
-          echo "${{ github.token }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
-          docker push "${IMAGE_REPOSITORY}"
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Log into registry ${{ env.REGISTRY }}
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@28218f9b04b4f3f62068d7b6ce6ca5b26e35336c
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Install devcontainer cli
+        run: npm install -g "@vscode/dev-container-cli"
+      - name: Build devcontainer
+        run: devcontainer build --no-cache --image-name ${{ env.IMAGE_NAME }} ${{ env.PACKAGE_DIR }}
+        with:
+          docker_buildkit: 1
+          buildkit_progress: plain
+      - name: Publish
+        run: docker push "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
