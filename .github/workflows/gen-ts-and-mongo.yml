@@ -14,8 +14,7 @@ env:
   REGISTRY: ghcr.io
   PACKAGE_DIR: ts-and-mongo
   # github.repository as <account>/<repo>
-  IMAGE_NAME: ${{ github.repository,, }}
-  
+  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   devcontainer:
@@ -42,5 +41,8 @@ jobs:
         env:
           DOCKER_BUILDKIT: 1
           BUILDKIT_PROGRESS: plain
+      - name: Set Image name lowercase
+        id: image_lc
+        run: echo "IMAGE_LC=${{ env.IMAGE_NAME,, }}" >> $GITHUB_ENV
       - name: Publish
-        run: docker push "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ env.PACKAGE_DIR }}:latest"
+        run: docker push "${{ env.REGISTRY }}/${{ env.IMAGE_LC }}/${{ env.PACKAGE_DIR }}:latest"
