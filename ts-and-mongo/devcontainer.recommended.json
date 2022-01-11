@@ -1,0 +1,31 @@
+{
+    "image": "ghcr.io/admiralfeb/devcontainers/ts-and-mongo",
+    "settings": {},
+    "extensions": [
+        "dbaeumer.vscode-eslint",
+        "mongodb.mongodb-vscode",
+        "orta.vscode-jest",
+        "hbenl.vscode-test-explorer",
+        "esbenp.prettier-vscode",
+        "eg2.vscode-npm-script"
+    ],
+    "forwardPorts": [
+        3000,
+        27017
+    ],
+    "portsAttributes": {
+        "3000": {
+            "label": "Application",
+            "onAutoForward": "notify"
+        },
+        "27017": {
+            "label": "MongoDb",
+            "onAutoForward": "notify"
+        }
+    },
+    "postCreateCommand": "npm install",
+    "remoteUser": "node",
+    "features": {
+        "git": "os-provided"
+    }
+}
